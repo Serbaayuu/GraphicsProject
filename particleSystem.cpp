@@ -1,5 +1,5 @@
 #include <iostream>
-#include <vector>
+#include <list>
 
 #ifdef __APPLE__
 #  include <GLUT/glut.h>
@@ -11,22 +11,25 @@ using namespace std;
 
 // Globals.
 static float Xangle = 0.0, Yangle = 0.0, Zangle = 0.0; // Angles to rotate scene.
-static float displacement = 0.1;
+static float displacement = 0.01;
 static float position = 0.0;
-static unsigned int redrawTime = 1000;
+static unsigned int redrawTime = 500;
+static float lifeTime = 4000;
+static float startDelay = 1000;
 
 struct particle{
     float xpos;
     float ypos;
     float zpos;
+    float age;
 };
 
-vector <particle> parts;
+list<particle> parts;
 
 // Drawing routine.
 void drawScene(void)
 {
-    glClear (GL_COLOR_BUFFER_BIT);// | GL_DEPTH_BUFFER_BIT);
+    glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
          
      // Rotate scene.
@@ -34,17 +37,25 @@ void drawScene(void)
     glRotatef(Yangle, 0.0, 1.0, 0.0);
     glRotatef(Xangle, 1.0, 0.0, 0.0);
     
-    glColor3f(0.0, 0.0, 0.0);
+    glColor3f(0.0, 0.0, 255.0);
     
-    //if(displacement + 0.0 > 100.0){
-    //    displacement = 0.1;
-    //}
-    
-    for(unsigned int i = 0; i < parts.size(); i++){
-        glTranslatef(parts[i].xpos, parts[i].ypos, parts[i].zpos);
-        parts[i].ypos += displacement;
+    for(list<particle>::iterator i = parts.begin(); i != parts.end(); i++)
+    {
+        glPushMatrix();
+        glTranslatef(i->xpos, i->ypos, i->zpos);
+        i->ypos += displacement;
         glutSolidSphere(1.0, 20.0, 20.0);
+        glPopMatrix();
+        if(i->age > lifeTime)
+        {
+            parts.erase(i);
+        }
+        else
+        {
+            i->age++;
+        }
     }
+    
     glFlush();
     glutPostRedisplay();
 }
@@ -124,6 +135,7 @@ void newParticle(int value)
     p.xpos = 0;
     p.ypos = 0;
     p.zpos = 0;
+    p.age = 0;
     parts.push_back(p);
     glutPostRedisplay();
     glutTimerFunc(redrawTime, newParticle, 1);
@@ -142,7 +154,7 @@ int main(int argc, char **argv)
     glutDisplayFunc(drawScene); 
     glutReshapeFunc(resize);  
     glutKeyboardFunc(keyInput);
-    glutTimerFunc(redrawTime, newParticle, 1);
+    glutTimerFunc(redrawTime + startDelay, newParticle, 1);
     glutMainLoop(); 
 
     return 0;
