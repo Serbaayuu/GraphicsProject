@@ -9,20 +9,26 @@
 
 using namespace std;
 
+struct vector3
+{
+    float x;
+    float y;
+    float z;
+};
+
+struct particle
+{
+    vector3 position;
+    float age;
+};
+
 // Globals.
 static float Xangle = 0.0, Yangle = 0.0, Zangle = 0.0; // Angles to rotate scene.
-static float displacement = 0.01;
+static vector3 displacement = {0.0, 0.01, 0.0};
 static float position = 0.0;
 static unsigned int redrawTime = 500;
 static float lifeTime = 4000;
 static float startDelay = 1000;
-
-struct particle{
-    float xpos;
-    float ypos;
-    float zpos;
-    float age;
-};
 
 list<particle> parts;
 
@@ -37,13 +43,15 @@ void drawScene(void)
     glRotatef(Yangle, 0.0, 1.0, 0.0);
     glRotatef(Xangle, 1.0, 0.0, 0.0);
     
-    glColor3f(0.0, 0.0, 255.0);
+    glColor3f(0.0, 200.0, 205.0);
     
     for(list<particle>::iterator i = parts.begin(); i != parts.end(); i++)
     {
         glPushMatrix();
-        glTranslatef(i->xpos, i->ypos, i->zpos);
-        i->ypos += displacement;
+        glTranslatef(i->position.x, i->position.y, i->position.z);
+        i->position.x += displacement.x;
+        i->position.y += displacement.y;
+        i->position.z += displacement.z;
         glutSolidSphere(1.0, 20.0, 20.0);
         glPopMatrix();
         if(i->age > lifeTime)
@@ -132,9 +140,9 @@ void printInteraction(void)
 void newParticle(int value)
 {
     particle p;
-    p.xpos = 0;
-    p.ypos = 0;
-    p.zpos = 0;
+    p.position.x = 0;
+    p.position.y = 0;
+    p.position.z = 0;
     p.age = 0;
     parts.push_back(p);
     glutPostRedisplay();
@@ -154,7 +162,7 @@ int main(int argc, char **argv)
     glutDisplayFunc(drawScene); 
     glutReshapeFunc(resize);  
     glutKeyboardFunc(keyInput);
-    glutTimerFunc(redrawTime + startDelay, newParticle, 1);
+    glutTimerFunc(startDelay, newParticle, 1);
     glutMainLoop(); 
 
     return 0;
