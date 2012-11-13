@@ -24,11 +24,12 @@ struct particle
 
 // Globals.
 static float Xangle = 0.0, Yangle = 0.0, Zangle = 0.0; // Angles to rotate scene.
-static vector3 displacement = {0.0, 0.01, 0.0};
+static vector3 displacement = {0.0, 0.05, 0.05};
 static float position = 0.0;
 static unsigned int redrawTime = 500;
 static float lifeTime = 4000;
 static float startDelay = 1000;
+static float particleRadius = 2.0f;
 
 list<particle> parts;
 
@@ -43,7 +44,7 @@ void drawScene(void)
     glRotatef(Yangle, 0.0, 1.0, 0.0);
     glRotatef(Xangle, 1.0, 0.0, 0.0);
     
-    glColor3f(0.0, 200.0, 205.0);
+    glColor3f(1.0, 1.0, 1.0);
     
     for(list<particle>::iterator i = parts.begin(); i != parts.end(); i++)
     {
@@ -52,7 +53,7 @@ void drawScene(void)
         i->position.x += displacement.x;
         i->position.y += displacement.y;
         i->position.z += displacement.z;
-        glutSolidSphere(1.0, 20.0, 20.0);
+        glutSolidSphere(particleRadius, 20.0, 20.0);
         glPopMatrix();
         if(i->age > lifeTime)
         {
@@ -73,6 +74,28 @@ void setup(void)
 {
     // set the background/clearing color
     glClearColor(1.0, 1.0, 1.0, 0.0);
+
+    // Turn on OpenGL lighting.
+    glEnable(GL_LIGHTING);
+
+    // Light property vectors.
+    float lightAmb[] = { 0.0, 0.0, 0.0, 1.0 };
+    float lightDifAndSpec0[] = { 1.0, 1.0, 1.0, 1.0 };
+    float globAmb[] = { 0.2, 0.2, 0.2, 1.0 };
+   
+    // Light0 properties.
+    glLightfv(GL_LIGHT0, GL_AMBIENT, lightAmb);
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, lightDifAndSpec0);
+    glLightfv(GL_LIGHT0, GL_SPECULAR, lightDifAndSpec0);
+
+    glEnable(GL_LIGHT0); // Enable particular light source.
+    glEnable(GL_LIGHT1); // Enable particular light source.
+    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, globAmb); // Global ambient light.
+    glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE); // Enable local viewpoint
+
+    // Cull back faces.
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
 }
 
 // OpenGL window reshape routine.
@@ -81,7 +104,7 @@ void resize(int w, int h)
     glViewport(0, 0, (GLsizei)w, (GLsizei)h); 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    glOrtho(-50.0, 50.0, -50.0, 50.0, -1.0, 1.0);
+    glOrtho(-50.0, 50.0, -50.0, 50.0, -50.0, 50.0);
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
