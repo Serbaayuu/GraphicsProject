@@ -24,18 +24,29 @@ struct particle
 
 // Globals.
 static float Xangle = 0.0, Yangle = 0.0, Zangle = 0.0; // Angles to rotate scene.
-static vector3 displacement = {0.0, 0.05, 0.05};
+static vector3 displacement = {0.0, 0.05, 0.0};
 static float position = 0.0;
 static unsigned int redrawTime = 500;
 static float lifeTime = 4000;
 static float startDelay = 1000;
 static float particleRadius = 2.0f;
+static float particleColors[] = {1.0, 0.0, 0.0, 1.0};
 
 list<particle> parts;
 
 // Drawing routine.
 void drawScene(void)
 {
+    // Light position vectors.	
+    float lightPos0[] = { 1.0, 1.0, 0.0, 0.0 };
+    
+    // Material property vectors.
+    float matAmb[] = {0.0, 0.0, 1.0, 1.0};
+    float matDif[] = {0.0, 0.0, 1.0, 1.0};
+    float matSpec[] = { 0.0, 0.0, 0.0, 1.0 };
+    float matShine[] = { 50.0 };
+    float matEmission[] = {0.0, 0.0, 0.0, 1.0};
+    
     glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
          
@@ -44,11 +55,25 @@ void drawScene(void)
     glRotatef(Yangle, 0.0, 1.0, 0.0);
     glRotatef(Xangle, 1.0, 0.0, 0.0);
     
-    glColor3f(1.0, 1.0, 1.0);
+    glDisable(GL_LIGHTING);
+
+    // Light0 is positioned.
+    glPushMatrix();
+    glLightfv(GL_LIGHT0, GL_POSITION, lightPos0);
+    glTranslatef(lightPos0[0], lightPos0[1], lightPos0[2]);
+    glPopMatrix();
+    
+    glEnable(GL_LIGHTING);
+    // Material properties of particle.
+    glMaterialfv(GL_FRONT, GL_AMBIENT, particleColors);
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, particleColors);
+    glMaterialfv(GL_FRONT, GL_SPECULAR, matSpec);
+    glMaterialfv(GL_FRONT, GL_SHININESS, matShine);
+    glMaterialfv(GL_FRONT, GL_EMISSION, matEmission);
     
     for(list<particle>::iterator i = parts.begin(); i != parts.end(); i++)
     {
-        glPushMatrix();
+        glPushMatrix();    
         glTranslatef(i->position.x, i->position.y, i->position.z);
         i->position.x += displacement.x;
         i->position.y += displacement.y;
@@ -89,7 +114,6 @@ void setup(void)
     glLightfv(GL_LIGHT0, GL_SPECULAR, lightDifAndSpec0);
 
     glEnable(GL_LIGHT0); // Enable particular light source.
-    glEnable(GL_LIGHT1); // Enable particular light source.
     glLightModelfv(GL_LIGHT_MODEL_AMBIENT, globAmb); // Global ambient light.
     glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE); // Enable local viewpoint
 
