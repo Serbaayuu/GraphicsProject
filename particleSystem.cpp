@@ -26,15 +26,16 @@ struct particle
 };
 
 // Globals.
-static float Xangle = 0.0, Yangle = 0.0, Zangle = 0.0; // Angles to rotate scene.
-static vector3 displacement = {0.0, 0.05, 0.0};
+static float Xangle = 0.0, Yangle = 0.0, Zangle = 0.0;  // Angles to rotate scene.
+static float startDelay = 1000;                         // Draw delay
+
+static vector3 displacement = {0.0, 0.01, 0.0};
 static vector3 randDisplacementMin = {-0.01, -0.01, -0.01};
 static vector3 randDisplacementMax = {0.01, 0.01, 0.01};
 static float position = 0.0;
-static unsigned int redrawTime = 100;
+static unsigned int redrawTime = 1000;
 static float lifeTime = 4000;
-static float startDelay = 1000;
-static float particleRadius = 2.0f;
+static float particleRadius = 5.0f;
 static bool randomColor = true;
 static float particleColor[] = {1.0, 0.0, 0.0, 1.0};
 
@@ -89,9 +90,9 @@ void drawScene(void)
         glMaterialfv(GL_FRONT, GL_EMISSION, matEmission);
         glPushMatrix();    
         glTranslatef(i->position.x, i->position.y, i->position.z);
-        i->position.x += /*displacement.x +*/ i->randDisplacement.x;
-        i->position.y += /*displacement.y +*/ i->randDisplacement.y;
-        i->position.z += /*displacement.z +*/ i->randDisplacement.z;
+        i->position.x += displacement.x + i->randDisplacement.x;
+        i->position.y += displacement.y + i->randDisplacement.y;
+        i->position.z += displacement.z + i->randDisplacement.z;
         glutSolidSphere(particleRadius, 20.0, 20.0);
         glPopMatrix();
         if(i->age > lifeTime)
