@@ -22,6 +22,7 @@ struct particle
     vector3 position;
     vector3 randDisplacement;
     float age;
+    float color[4];
 };
 
 // Globals.
@@ -34,7 +35,8 @@ static unsigned int redrawTime = 100;
 static float lifeTime = 4000;
 static float startDelay = 1000;
 static float particleRadius = 2.0f;
-static float particleColors[] = {1.0, 0.0, 0.0, 1.0};
+static bool randomColor = true;
+static float particleColor[] = {1.0, 0.0, 0.0, 1.0};
 
 list<particle> parts;
 
@@ -67,16 +69,24 @@ void drawScene(void)
     glTranslatef(lightPos0[0], lightPos0[1], lightPos0[2]);
     glPopMatrix();
     
-    glEnable(GL_LIGHTING);
-    // Material properties of particle.
-    glMaterialfv(GL_FRONT, GL_AMBIENT, particleColors);
-    glMaterialfv(GL_FRONT, GL_DIFFUSE, particleColors);
-    glMaterialfv(GL_FRONT, GL_SPECULAR, matSpec);
-    glMaterialfv(GL_FRONT, GL_SHININESS, matShine);
-    glMaterialfv(GL_FRONT, GL_EMISSION, matEmission);
+    glEnable(GL_LIGHTING);   
     
     for(list<particle>::iterator i = parts.begin(); i != parts.end(); i++)
     {
+        // Material properties of particle.
+        if (randomColor)
+        {
+            glMaterialfv(GL_FRONT, GL_AMBIENT, i->color);
+            glMaterialfv(GL_FRONT, GL_DIFFUSE, i->color);
+        }
+        else
+        {
+            glMaterialfv(GL_FRONT, GL_AMBIENT, particleColor);
+            glMaterialfv(GL_FRONT, GL_DIFFUSE, particleColor);
+        }
+        glMaterialfv(GL_FRONT, GL_SPECULAR, matSpec);
+        glMaterialfv(GL_FRONT, GL_SHININESS, matShine);
+        glMaterialfv(GL_FRONT, GL_EMISSION, matEmission);
         glPushMatrix();    
         glTranslatef(i->position.x, i->position.y, i->position.z);
         i->position.x += /*displacement.x +*/ i->randDisplacement.x;
@@ -198,7 +208,13 @@ void newParticle(int value)
     p.randDisplacement.x = rand.randDblExc(randDisplacementMax.x - randDisplacementMin.x) + randDisplacementMin.x;
     p.randDisplacement.y = rand.randDblExc(randDisplacementMax.y - randDisplacementMin.y) + randDisplacementMin.y;
     p.randDisplacement.z = rand.randDblExc(randDisplacementMax.z - randDisplacementMin.z) + randDisplacementMin.z;
-    cout << p.randDisplacement.x << " " << p.randDisplacement.y << " " << p.randDisplacement.z << endl;
+    if (randomColor)
+    {
+        p.color[0] = rand.randDblExc();
+        p.color[1] = rand.randDblExc();
+        p.color[2] = rand.randDblExc();
+        p.color[3] = 1.0;
+    }
     p.age = 0;
     parts.push_back(p);
     glutPostRedisplay();
