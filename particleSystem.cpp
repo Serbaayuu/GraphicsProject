@@ -1,5 +1,6 @@
 #include <iostream>
 #include <list>
+#include "MersenneTwister.h"
 
 #ifdef __APPLE__
 #  include <GLUT/glut.h>
@@ -19,14 +20,17 @@ struct vector3
 struct particle
 {
     vector3 position;
+    vector3 randDisplacement;
     float age;
 };
 
 // Globals.
 static float Xangle = 0.0, Yangle = 0.0, Zangle = 0.0; // Angles to rotate scene.
 static vector3 displacement = {0.0, 0.05, 0.0};
+static vector3 randDisplacementMin = {-0.01, -0.01, -0.01};
+static vector3 randDisplacementMax = {0.01, 0.01, 0.01};
 static float position = 0.0;
-static unsigned int redrawTime = 500;
+static unsigned int redrawTime = 100;
 static float lifeTime = 4000;
 static float startDelay = 1000;
 static float particleRadius = 2.0f;
@@ -75,9 +79,9 @@ void drawScene(void)
     {
         glPushMatrix();    
         glTranslatef(i->position.x, i->position.y, i->position.z);
-        i->position.x += displacement.x;
-        i->position.y += displacement.y;
-        i->position.z += displacement.z;
+        i->position.x += /*displacement.x +*/ i->randDisplacement.x;
+        i->position.y += /*displacement.y +*/ i->randDisplacement.y;
+        i->position.z += /*displacement.z +*/ i->randDisplacement.z;
         glutSolidSphere(particleRadius, 20.0, 20.0);
         glPopMatrix();
         if(i->age > lifeTime)
@@ -190,6 +194,11 @@ void newParticle(int value)
     p.position.x = 0;
     p.position.y = 0;
     p.position.z = 0;
+    MTRand rand;
+    p.randDisplacement.x = rand.randDblExc(randDisplacementMax.x - randDisplacementMin.x) + randDisplacementMin.x;
+    p.randDisplacement.y = rand.randDblExc(randDisplacementMax.y - randDisplacementMin.y) + randDisplacementMin.y;
+    p.randDisplacement.z = rand.randDblExc(randDisplacementMax.z - randDisplacementMin.z) + randDisplacementMin.z;
+    cout << p.randDisplacement.x << " " << p.randDisplacement.y << " " << p.randDisplacement.z << endl;
     p.age = 0;
     parts.push_back(p);
     glutPostRedisplay();
