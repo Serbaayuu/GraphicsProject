@@ -27,15 +27,16 @@ struct particle
 
 // Globals.
 static float Xangle = 0.0, Yangle = 0.0, Zangle = 0.0;  // Angles to rotate scene.
-static float startDelay = 1000;                         // Draw delay
+static float startDelay = 1000; // Draw delay
+static vector3 startPosition = {0.0, 10.0, 0.0};
 
-static vector3 displacement = {0.0, 0.01, 0.0};
+// User can manipulate these
+static vector3 displacement = {0.0, 0.0, 0.0};
 static vector3 randDisplacementMin = {-0.01, -0.01, -0.01};
 static vector3 randDisplacementMax = {0.01, 0.01, 0.01};
-static float position = 0.0;
-static unsigned int redrawTime = 1000;
+static unsigned int redrawTime = 100;
 static float lifeTime = 4000;
-static float particleRadius = 5.0f;
+static float particleRadius = 1.0f;
 static bool randomColor = true;
 static float particleColor[] = {1.0, 0.0, 0.0, 1.0};
 
@@ -202,9 +203,9 @@ void printInteraction(void)
 void newParticle(int value)
 {
     particle p;
-    p.position.x = 0;
-    p.position.y = 0;
-    p.position.z = 0;
+    p.position.x = startPosition.x;
+    p.position.y = startPosition.y;
+    p.position.z = startPosition.z;
     MTRand rand;
     p.randDisplacement.x = rand.randDblExc(randDisplacementMax.x - randDisplacementMin.x) + randDisplacementMin.x;
     p.randDisplacement.y = rand.randDblExc(randDisplacementMax.y - randDisplacementMin.y) + randDisplacementMin.y;
@@ -228,7 +229,7 @@ int main(int argc, char **argv)
     printInteraction();
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
-    glutInitWindowSize(500, 500);
+    glutInitWindowSize(1000, 1000);
     glutInitWindowPosition(100, 100); 
     glutCreateWindow("Particle System"); 
     setup(); 
