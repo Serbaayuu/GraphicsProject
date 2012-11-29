@@ -1,6 +1,8 @@
 #include <iostream>
 #include <list>
 #include "MersenneTwister.h"
+#include <string>
+#include <vector>
 
 #ifdef __APPLE__
 #  include <GLUT/glut.h>
@@ -25,10 +27,20 @@ struct particle
     float color[4];
 };
 
+static int mousex, mousey, mousex_prev, mousey_prev;
+
+struct slider{
+	float y, last_y, linex, liney;
+	bool sliding;
+};
+
 // Globals.
 static float Xangle = 0.0, Yangle = 0.0, Zangle = 0.0;  // Angles to rotate scene.
 static float startDelay = 1000; // Draw delay
 static vector3 startPosition = {0.0, 10.0, 0.0};
+static long font = (long)GLUT_BITMAP_8_BY_13; // Font selection
+static float lineLength = 3.0;
+
 
 // User can manipulate these
 static vector3 displacement = {0.0, 0.0, 0.0};
@@ -41,6 +53,37 @@ static bool randomColor = true;
 static float particleColor[] = {1.0, 0.0, 0.0, 1.0};
 
 list<particle> parts;
+vector<slider> slides;
+
+// Routine to draw a bitmap character string.
+void writeBitmapString(void *font, string string)
+{  
+   int i;
+   for (i = 0; i < string.length(); i++)
+   {
+       glutBitmapCharacter(font, string[i]);
+   }
+}
+
+void newSlider(int linex, int liney){
+    slider s;
+    s.y = liney;
+    s.last_y = liney;
+    s.linex = linex;
+    s.liney = liney;
+    s.sliding = false;
+    slides.push_back(s);
+}
+
+// Write data.
+void drawGUI(void)
+{
+   glColor3f(0.0, 0.0, 0.0); 
+   
+   glRasterPos3f(-40.0, -40.0, 0.0);
+   writeBitmapString((void*)font, "HERE I AM");
+   
+}
 
 // Drawing routine.
 void drawScene(void)
@@ -64,6 +107,39 @@ void drawScene(void)
     glRotatef(Xangle, 1.0, 0.0, 0.0);
     
     glDisable(GL_LIGHTING);
+    
+    drawGUI();
+    
+    glColor3f(0.0, 0.0, 0.0);
+
+    for (int i = 0; i < slides.size(); i++){
+        glBegin(GL_LINES);
+        glVertex3f(slides[i].linex, slides[i].liney, 0.0);
+        glVertex3f(slides[i].linex, slides[i].liney - lineLength, 0.0);
+        glEnd();
+
+        glPushMatrix();
+
+        if(slides[i].sliding){
+                slides[i].y = mousey + 3;
+                if(slides[i].y > slides[i].liney){
+                        slides[i].y = slides[i].liney;
+                }
+                if(slides[i].y < slides[i].liney - lineLength + lineLength / 5.0){
+                        slides[i].y = slides[i].liney - lineLength + lineLength / 5.0;
+                }
+        }
+
+        glBegin(GL_POLYGON);
+        glVertex3f(slides[i].linex + lineLength / 2.0, slides[i].y, 0.0);
+        glVertex3f(slides[i].linex + lineLength / 2.0, slides[i].y - lineLength / 5.0, 0.0);
+        glVertex3f(slides[i].linex - lineLength / 2.0, slides[i].y - lineLength / 5.0, 0.0);
+        glVertex3f(slides[i].linex - lineLength / 2.0, slides[i].y, 0.0);
+        glEnd();
+        glPopMatrix();
+    }
+    
+    
 
     // Light0 is positioned.
     glPushMatrix();
@@ -136,6 +212,8 @@ void setup(void)
     // Cull back faces.
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
+    
+    newSlider(0.0, 0.0);
 }
 
 // OpenGL window reshape routine.
@@ -193,12 +271,6 @@ void keyInput(unsigned char key, int x, int y)
     }
 }
 
-// Routine to output interaction instructions to the C++ window.
-void printInteraction(void)
-{
-    
-}
-
 // Timer redraw
 void newParticle(int value)
 {
@@ -223,10 +295,33 @@ void newParticle(int value)
     glutTimerFunc(redrawTime, newParticle, 1);
 }
 
+void processMouseActiveMotion(int x, int y)
+{
+    x -= 500;
+    y = -(y - 500);
+
+    mousex_prev = mousex;
+    mousey_prev = mousey;
+    for(int i = 0; i < slides.size(); i++){
+            if(x <= slides[i].linex + lineLength / 2.0 && x >= slides[i].linex - lineLength / 2.0 && y >= slides[i].y - lineLength / 5.0 && y <= slides[i].y){
+                    slides[i].sliding = true;
+            }else if(y < slides[i].y - 11.0 || y > slides[i].y + 5){
+                    slides[i].sliding = false;
+            }
+    }
+    mousex = x;
+    mousey = y;
+}
+
+void processMouse(int button, int state, int x, int y){
+    if(state == GLUT_UP){
+            slides[0].sliding = false;
+    }
+}
+
 // Main routine.
 int main(int argc, char **argv) 
 {
-    printInteraction();
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
     glutInitWindowSize(1000, 1000);
@@ -237,6 +332,8 @@ int main(int argc, char **argv)
     glutReshapeFunc(resize);  
     glutKeyboardFunc(keyInput);
     glutTimerFunc(startDelay, newParticle, 1);
+    glutMotionFunc(processMouseActiveMotion);
+    glutMouseFunc(processMouse);
     glutMainLoop(); 
 
     return 0;
