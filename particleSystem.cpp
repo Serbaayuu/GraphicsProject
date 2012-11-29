@@ -30,12 +30,11 @@ struct particle
 static int mousex, mousey, mousex_prev, mousey_prev;
 
 struct slider{
-	float y, last_y, linex, liney;
-	bool sliding;
+    float y, last_y, linex, liney;
+    bool sliding;
 };
 
 // Globals.
-static float Xangle = 0.0, Yangle = 0.0, Zangle = 0.0;  // Angles to rotate scene.
 static float startDelay = 1000; // Draw delay
 static vector3 startPosition = {0.0, 10.0, 0.0};
 static long font = (long)GLUT_BITMAP_8_BY_13; // Font selection
@@ -92,27 +91,21 @@ void drawScene(void)
     float lightPos0[] = { 1.0, 1.0, 0.0, 0.0 };
     
     // Material property vectors.
-    float matAmb[] = {0.0, 0.0, 1.0, 1.0};
-    float matDif[] = {0.0, 0.0, 1.0, 1.0};
     float matSpec[] = { 0.0, 0.0, 0.0, 1.0 };
     float matShine[] = { 50.0 };
     float matEmission[] = {0.0, 0.0, 0.0, 1.0};
     
     glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
-         
-     // Rotate scene.
-    glRotatef(Zangle, 0.0, 0.0, 1.0);
-    glRotatef(Yangle, 0.0, 1.0, 0.0);
-    glRotatef(Xangle, 1.0, 0.0, 0.0);
-    
+
     glDisable(GL_LIGHTING);
     
-    drawGUI();
+    drawGUI();    
     
     glColor3f(0.0, 0.0, 0.0);
 
-    for (int i = 0; i < slides.size(); i++){
+    for (int i = 0; i < slides.size(); i++)
+    {
         glBegin(GL_LINES);
         glVertex3f(slides[i].linex, slides[i].liney, 0.0);
         glVertex3f(slides[i].linex, slides[i].liney - lineLength, 0.0);
@@ -131,16 +124,14 @@ void drawScene(void)
         }
 
         glBegin(GL_POLYGON);
-        glVertex3f(slides[i].linex + lineLength / 2.0, slides[i].y, 0.0);
-        glVertex3f(slides[i].linex + lineLength / 2.0, slides[i].y - lineLength / 5.0, 0.0);
-        glVertex3f(slides[i].linex - lineLength / 2.0, slides[i].y - lineLength / 5.0, 0.0);
         glVertex3f(slides[i].linex - lineLength / 2.0, slides[i].y, 0.0);
+        glVertex3f(slides[i].linex - lineLength / 2.0, slides[i].y - lineLength / 5.0, 0.0);
+        glVertex3f(slides[i].linex + lineLength / 2.0, slides[i].y - lineLength / 5.0, 0.0);
+        glVertex3f(slides[i].linex + lineLength / 2.0, slides[i].y, 0.0);
         glEnd();
         glPopMatrix();
     }
-    
-    
-
+   
     // Light0 is positioned.
     glPushMatrix();
     glLightfv(GL_LIGHT0, GL_POSITION, lightPos0);
@@ -213,7 +204,9 @@ void setup(void)
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
     
-    newSlider(0.0, 0.0);
+    newSlider(30.0, 0.0);
+    newSlider(20.0, 40.0);
+    newSlider(6.0, 5.0);
 }
 
 // OpenGL window reshape routine.
@@ -235,36 +228,6 @@ void keyInput(unsigned char key, int x, int y)
     {
         case 27:
             exit(0);
-            break;
-        case 'x':
-            Xangle += 5.0;
-		 if (Xangle > 360.0) Xangle -= 360.0;
-            glutPostRedisplay();
-            break;
-        case 'X':
-            Xangle -= 5.0;
-		 if (Xangle < 0.0) Xangle += 360.0;
-            glutPostRedisplay();
-            break;
-        case 'y':
-            Yangle += 5.0;
-		 if (Yangle > 360.0) Yangle -= 360.0;
-            glutPostRedisplay();
-            break;
-        case 'Y':
-            Yangle -= 5.0;
-		 if (Yangle < 0.0) Yangle += 360.0;
-            glutPostRedisplay();
-            break;
-        case 'z':
-            Zangle += 5.0;
-		 if (Zangle > 360.0) Zangle -= 360.0;
-            glutPostRedisplay();
-            break;
-        case 'Z':
-            Zangle -= 5.0;
-		 if (Zangle < 0.0) Zangle += 360.0;
-            glutPostRedisplay();
             break;
         default:
             break;
@@ -299,23 +262,29 @@ void processMouseActiveMotion(int x, int y)
 {
     x -= 500;
     y = -(y - 500);
-
+    cout << "x: " << x << " y: " << y << endl;
+    float xnew = (float)x / 10.0;
+    float ynew = (float)y / 10.0;
+    cout << "xnew: " << xnew << " ynew: " << ynew << endl;
     mousex_prev = mousex;
     mousey_prev = mousey;
     for(int i = 0; i < slides.size(); i++){
-            if(x <= slides[i].linex + lineLength / 2.0 && x >= slides[i].linex - lineLength / 2.0 && y >= slides[i].y - lineLength / 5.0 && y <= slides[i].y){
+            if(xnew <= slides[i].linex + lineLength / 2.0 && xnew >= slides[i].linex - lineLength / 2.0 && ynew >= slides[i].y - lineLength / 5.0 && ynew <= slides[i].y){
                     slides[i].sliding = true;
-            }else if(y < slides[i].y - 11.0 || y > slides[i].y + 5){
+            }else if(ynew < slides[i].y - 11.0 || ynew > slides[i].y + 5){
                     slides[i].sliding = false;
             }
     }
-    mousex = x;
-    mousey = y;
+    mousex = xnew;
+    mousey = ynew;
 }
 
 void processMouse(int button, int state, int x, int y){
     if(state == GLUT_UP){
-            slides[0].sliding = false;
+        for (int i = 0; i < slides.size(); i++)
+        {
+            slides[i].sliding = false;
+        }
     }
 }
 
