@@ -48,8 +48,8 @@ static vector3 randDisplacementMax = {0.01, 0.01, 0.01};
 static unsigned int redrawTime = 100;
 static float lifeTime = 4000;
 static float particleRadius = 1.0f;
-static bool randomColor = true;
-static float particleColor[] = {1.0, 0.0, 0.0, 1.0};
+static bool randomColor = false;
+static float particleColor[] = {1.0, 0.8, 0.8, 1.0};
 
 list<particle> parts;
 vector<slider> slides;
@@ -79,8 +79,29 @@ void drawGUI(void)
 {
    glColor3f(0.0, 0.0, 0.0); 
    
-   glRasterPos3f(-40.0, -40.0, 0.0);
-   writeBitmapString((void*)font, "HERE I AM");
+   glRasterPos3f(-45.0, -35.0, 0.0);
+   writeBitmapString((void*)font, "Particle Speed    x:       y:       z:");
+   
+   glRasterPos3f(-45.0, -40.0, 0.0);
+   writeBitmapString((void*)font, "Random Speed Min  x:       y:       z:");
+   
+   glRasterPos3f(-45.0, -45.0, 0.0);
+   writeBitmapString((void*)font, "Random Speed Max  x:       y:       z:");
+   
+   glRasterPos3f(-5.0, -35.0, 0.0);
+   writeBitmapString((void*)font, "Redraw time");
+   
+   glRasterPos3f(-5.0, -40.0, 0.0);
+   writeBitmapString((void*)font, "Lifetime");
+   
+   glRasterPos3f(-5.0, -45.0, 0.0);
+   writeBitmapString((void*)font, "Particle size");
+   
+   glRasterPos3f(15.0, -35.0, 0.0);
+   writeBitmapString((void*)font, "Random color");
+   
+   glRasterPos3f(15.0, -40.0, 0.0);
+   writeBitmapString((void*)font, "Color  r:       g:       b:       a:");
    
 }
 
@@ -204,9 +225,7 @@ void setup(void)
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
     
-    newSlider(30.0, 0.0);
-    newSlider(20.0, 40.0);
-    newSlider(6.0, 5.0);
+    //newSlider(30.0, 0.0);
 }
 
 // OpenGL window reshape routine.
