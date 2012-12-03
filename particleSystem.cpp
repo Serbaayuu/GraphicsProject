@@ -66,7 +66,7 @@ void writeBitmapString(void *font, string string)
 
 void newSlider(float linex, float liney){
     slider s;
-    s.y = liney;
+    s.y = liney - lineLength / 2;
     s.linex = linex;
     s.liney = liney;
     s.sliding = false;
@@ -100,7 +100,7 @@ void drawGUI(void)
    writeBitmapString((void*)font, "Random color");
    
    glRasterPos3f(15.0, -40.0, 0.0);
-   writeBitmapString((void*)font, "Color  r:       g:       b:       a:");
+   writeBitmapString((void*)font, "Color  r:       g:       b:");
    
 }
 
@@ -138,8 +138,8 @@ void drawScene(void)
                 if(slides[i].y > slides[i].liney){
                     slides[i].y = slides[i].liney;
                 }
-                if(slides[i].y < slides[i].liney - lineLength + lineLength / 5.0){
-                    slides[i].y = slides[i].liney - lineLength + lineLength / 5.0;
+                if(slides[i].y < slides[i].liney - lineLength){
+                    slides[i].y = slides[i].liney - lineLength;
                 }
         }
 
@@ -151,6 +151,37 @@ void drawScene(void)
         glEnd();
         glPopMatrix();
     }
+    
+    displacement.x = ((slides[0].y - slides[0].liney) + lineLength / 2) / 50;
+    displacement.y = ((slides[1].y - slides[1].liney) + lineLength / 2) / 50;
+    displacement.z = ((slides[2].y - slides[2].liney) + lineLength / 2) / 50;
+    
+    randDisplacementMin.x = ((slides[3].y - slides[3].liney) + lineLength / 2) / 50;
+    randDisplacementMin.y = ((slides[4].y - slides[4].liney) + lineLength / 2) / 50;
+    randDisplacementMin.z = ((slides[5].y - slides[5].liney) + lineLength / 2) / 50;
+    
+    randDisplacementMax.x = ((slides[6].y - slides[6].liney) + lineLength / 2) / 50;
+    randDisplacementMax.y = ((slides[7].y - slides[7].liney) + lineLength / 2) / 50;
+    randDisplacementMax.z = ((slides[8].y - slides[8].liney) + lineLength / 2) / 50;
+    
+    redrawTime = (slides[9].liney - slides[9].y) * 100 + 50;
+    
+    lifeTime = (slides[10].liney - slides[10].y) * 1000 + 100;
+    
+    particleRadius = (slides[11].liney - slides[11].y) + 1;
+    
+    if (slides[12].liney - slides[12].y > lineLength / 2)
+    {
+        randomColor = false;
+    }
+    else
+    {
+        randomColor = true;
+    }
+    
+    particleColor[0] = (slides[13].liney - slides[13].y) / 3;
+    particleColor[1] = (slides[14].liney - slides[14].y) / 3;
+    particleColor[2] = (slides[15].liney - slides[15].y) / 3;
    
     // Light0 is positioned.
     glPushMatrix();
@@ -306,8 +337,37 @@ void processMouse(int button, int state, int x, int y){
 //Draw our sliders
 void drawSliders()
 {
+    // displacement
     newSlider(-26, -33);
+    newSlider(-19, -33);
+    newSlider(-12, -33);
     
+    // random displacement min
+    newSlider(-26, -38.5);
+    newSlider(-19, -38.5);
+    newSlider(-12, -38.5);
+    
+    // random displacement max
+    newSlider(-26, -43);
+    newSlider(-19, -43);
+    newSlider(-12, -43);
+    
+    // redraw time
+    newSlider(8, -33);
+    
+    // life time
+    newSlider(8, -38.5);
+    
+    //particle size
+    newSlider(8, -43);
+    
+    // random color
+    newSlider(27, -33);
+    
+    // color (r,g,b,a)
+    newSlider(25, -38.5);
+    newSlider(32, -38.5);
+    newSlider(39, -38.5);
 }
 
 // Main routine.
