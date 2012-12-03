@@ -27,10 +27,10 @@ struct particle
     float color[4];
 };
 
-static int mousex, mousey, mousex_prev, mousey_prev;
+static float mousex, mousey;
 
 struct slider{
-    float y, last_y, linex, liney;
+    float y, linex, liney;
     bool sliding;
 };
 
@@ -64,10 +64,9 @@ void writeBitmapString(void *font, string string)
    }
 }
 
-void newSlider(int linex, int liney){
+void newSlider(float linex, float liney){
     slider s;
     s.y = liney;
-    s.last_y = liney;
     s.linex = linex;
     s.liney = liney;
     s.sliding = false;
@@ -119,9 +118,9 @@ void drawScene(void)
     glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
 
-    glDisable(GL_LIGHTING);
+    glDisable(GL_LIGHTING);  
     
-    drawGUI();    
+    drawGUI();
     
     glColor3f(0.0, 0.0, 0.0);
 
@@ -135,12 +134,12 @@ void drawScene(void)
         glPushMatrix();
 
         if(slides[i].sliding){
-                slides[i].y = mousey + 3;
+                slides[i].y = mousey;
                 if(slides[i].y > slides[i].liney){
-                        slides[i].y = slides[i].liney;
+                    slides[i].y = slides[i].liney;
                 }
                 if(slides[i].y < slides[i].liney - lineLength + lineLength / 5.0){
-                        slides[i].y = slides[i].liney - lineLength + lineLength / 5.0;
+                    slides[i].y = slides[i].liney - lineLength + lineLength / 5.0;
                 }
         }
 
@@ -224,8 +223,6 @@ void setup(void)
     // Cull back faces.
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
-    
-    //newSlider(30.0, 0.0);
 }
 
 // OpenGL window reshape routine.
@@ -281,21 +278,20 @@ void processMouseActiveMotion(int x, int y)
 {
     x -= 500;
     y = -(y - 500);
-    cout << "x: " << x << " y: " << y << endl;
-    float xnew = (float)x / 10.0;
-    float ynew = (float)y / 10.0;
-    cout << "xnew: " << xnew << " ynew: " << ynew << endl;
-    mousex_prev = mousex;
-    mousey_prev = mousey;
+    float newX = x / 10.0;
+    float newY = y / 10.0;
+    
     for(int i = 0; i < slides.size(); i++){
-            if(xnew <= slides[i].linex + lineLength / 2.0 && xnew >= slides[i].linex - lineLength / 2.0 && ynew >= slides[i].y - lineLength / 5.0 && ynew <= slides[i].y){
+            if(newX <= slides[i].linex + lineLength / 2.0 &&
+                    newX >= slides[i].linex - lineLength / 2.0 && 
+                    newY >= slides[i].y - lineLength / 5.0 && newY <= slides[i].y){
                     slides[i].sliding = true;
-            }else if(ynew < slides[i].y - 11.0 || ynew > slides[i].y + 5){
+            }else if(newY < slides[i].y - 11.0 || newY > slides[i].y + 5){
                     slides[i].sliding = false;
             }
     }
-    mousex = xnew;
-    mousey = ynew;
+    mousex = newX;
+    mousey = newY;
 }
 
 void processMouse(int button, int state, int x, int y){
@@ -305,6 +301,13 @@ void processMouse(int button, int state, int x, int y){
             slides[i].sliding = false;
         }
     }
+}
+
+//Draw our sliders
+void drawSliders()
+{
+    newSlider(-26, -33);
+    
 }
 
 // Main routine.
@@ -322,6 +325,7 @@ int main(int argc, char **argv)
     glutTimerFunc(startDelay, newParticle, 1);
     glutMotionFunc(processMouseActiveMotion);
     glutMouseFunc(processMouse);
+    drawSliders();
     glutMainLoop(); 
 
     return 0;
